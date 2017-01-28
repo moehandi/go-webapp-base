@@ -7,10 +7,12 @@ import (
 
 	"github.com/gorilla/context"
 	"github.com/josephspurrier/csrfbanana"
-	"github.com/julienschmidt/httprouter"
+
 	"github.com/moehandi/go-webapp-base/app/model"
 	"github.com/moehandi/go-webapp-base/helper/session"
 	"github.com/moehandi/go-webapp-base/helper/view"
+	"github.com/julienschmidt/httprouter"
+	"github.com/gorilla/mux"
 )
 
 
@@ -88,10 +90,12 @@ func NotepadUpdateGET(w http.ResponseWriter, r *http.Request) {
 	// Get session
 	sess := session.Instance(r)
 
+	vars := mux.Vars(r)
+	noteID := vars["id"]
 	// Get the note id
-	var params httprouter.Params
-	params = context.Get(r, "params").(httprouter.Params)
-	noteID := params.ByName("id")
+	//var params httprouter.Params
+	//params = context.Get(r, "params").(httprouter.Params)
+	//noteID := params.ByName("id")
 
 	userID := fmt.Sprintf("%s", sess.Values["id"])
 
@@ -131,9 +135,11 @@ func NotepadUpdatePOST(w http.ResponseWriter, r *http.Request) {
 
 	userID := fmt.Sprintf("%s", sess.Values["id"])
 
-	var params httprouter.Params
-	params = context.Get(r, "params").(httprouter.Params)
-	noteID := params.ByName("id")
+	vars := mux.Vars(r)
+	noteID := vars["id"]
+	//var params httprouter.Params
+	//params = context.Get(r, "params").(httprouter.Params)
+	//noteID := params.ByName("id")
 
 	// Get database result
 	err := model.NoteUpdate(content, userID, noteID)

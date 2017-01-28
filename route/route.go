@@ -5,14 +5,15 @@ import (
 
 	"github.com/gorilla/context"
 	"github.com/josephspurrier/csrfbanana"
-	"github.com/julienschmidt/httprouter"
+	//"github.com/julienschmidt/httprouter"
 	"github.com/justinas/alice"
 	"github.com/moehandi/go-webapp-base/app/controller"
 	"github.com/moehandi/go-webapp-base/route/middleware/acl"
-	hr "github.com/moehandi/go-webapp-base/route/middleware/httprouterwrapper"
 	"github.com/moehandi/go-webapp-base/route/middleware/logrequest"
-	"github.com/moehandi/go-webapp-base/route/middleware/pprofhandler"
+	//"github.com/moehandi/go-webapp-base/route/middleware/pprofhandler"
 	"github.com/moehandi/go-webapp-base/helper/session"
+	"github.com/gorilla/mux"
+	"github.com/moehandi/go-webapp-base/route/middleware/pprofhandler"
 )
 
 // Load returns the routes and middleware
@@ -42,70 +43,40 @@ func redirectToHTTPS(w http.ResponseWriter, req *http.Request) {
 // Routes
 // *****************************************************************************
 
-func routes() *httprouter.Router {
-	r := httprouter.New()
+func routes() *mux.Router {
+	r := mux.NewRouter()
 
-	// Set 404 handler
-	r.NotFound = alice.New().ThenFunc(controller.Error404)
+	// TODO Custom error Page
+	r.NotFoundHandler = http.HandlerFunc(controller.Error404)
 
 	// Serve static files, no directory browsing
-	r.GET("/static/*filepath", hr.Handler(alice.
-		New().
-		ThenFunc(controller.Static)))
+	r.PathPrefix("/static/").Handler(alice.New().ThenFunc(controller.Static))
 
-	// Home page
-	r.GET("/", hr.Handler(alice.
-		New().
-		ThenFunc(controller.IndexGET)))
+	// Home Page
+	r.Handle("/", alice.New().ThenFunc(controller.IndexGET)).Methods("GET")
 
 	// Login
-	r.GET("/login", hr.Handler(alice.
-		New(acl.DisallowAuth).
-		ThenFunc(controller.LoginGET)))
-	r.POST("/login", hr.Handler(alice.
-		New(acl.DisallowAuth).
-		ThenFunc(controller.LoginPOST)))
-	r.GET("/logout", hr.Handler(alice.
-		New().
-		ThenFunc(controller.LogoutGET)))
+	r.Handle("/login", alice.New(acl.DisallowAuth).ThenFunc(controller.LoginGET)).Methods("GET")
+	r.Handle("/login", alice.New(acl.DisallowAuth).ThenFunc(controller.LoginPOST)).Methods("POST")
+	r.Handle("/logout", alice.New().ThenFunc(controller.LogoutGET))
 
 	// Register
-	r.GET("/register", hr.Handler(alice.
-		New(acl.DisallowAuth).
-		ThenFunc(controller.RegisterGET)))
-	r.POST("/register", hr.Handler(alice.
-		New(acl.DisallowAuth).
-		ThenFunc(controller.RegisterPOST)))
+	r.Handle("/register", alice.New(acl.DisallowAuth).ThenFunc(controller.RegisterGET)).Methods("GET")
+	r.Handle("/register", alice.New(acl.DisallowAuth).ThenFunc(controller.RegisterPOST)).Methods("POST")
 
 	// About
-	r.GET("/about", hr.Handler(alice.
-		New().
-		ThenFunc(controller.AboutGET)))
+	r.Handle("/about", alice.New().ThenFunc(controller.AboutGET)).Methods("GET")
 
 	// Notepad
-	r.GET("/notepad", hr.Handler(alice.
-		New(acl.DisallowAnon).
-		ThenFunc(controller.NotepadReadGET)))
-	r.GET("/notepad/create", hr.Handler(alice.
-		New(acl.DisallowAnon).
-		ThenFunc(controller.NotepadCreateGET)))
-	r.POST("/notepad/create", hr.Handler(alice.
-		New(acl.DisallowAnon).
-		ThenFunc(controller.NotepadCreatePOST)))
-	r.GET("/notepad/update/:id", hr.Handler(alice.
-		New(acl.DisallowAnon).
-		ThenFunc(controller.NotepadUpdateGET)))
-	r.POST("/notepad/update/:id", hr.Handler(alice.
-		New(acl.DisallowAnon).
-		ThenFunc(controller.NotepadUpdatePOST)))
-	r.GET("/notepad/delete/:id", hr.Handler(alice.
-		New(acl.DisallowAnon).
-		ThenFunc(controller.NotepadDeleteGET)))
+	r.Handle("/notepad", alice.New(acl.DisallowAnon).ThenFunc(controller.NotepadReadGET)).Methods("GET")
+	r.Handle("/notepad/create", alice.New(acl.DisallowAnon).ThenFunc(controller.NotepadCreateGET)).Methods("GET")
+	r.Handle("/notepad/create", alice.New(acl.DisallowAnon).ThenFunc(controller.NotepadCreatePOST)).Methods("POST")
+	r.Handle("/notepad/update/{id}", alice.New(acl.DisallowAnon).ThenFunc(controller.NotepadUpdateGET)).Methods("GET")
+	r.Handle("/notepad/update/{id}", alice.New(acl.DisallowAnon).ThenFunc(controller.NotepadUpdatePOST)).Methods("POST")
+	r.Handle("/notepad/delete/{id}", alice.New(acl.DisallowAnon).ThenFunc(controller.NotepadDeleteGET)).Methods("GET")
 
 	// Enable Pprof
-	r.GET("/debug/pprof/*pprof", hr.Handler(alice.
-		New(acl.DisallowAnon).
-		ThenFunc(pprofhandler.Handler)))
+	r.Handle("/debug/pprof/*pprof", alice.New(acl.DisallowAnon).ThenFunc(pprofhandler.Handler))
 
 	return r
 }
