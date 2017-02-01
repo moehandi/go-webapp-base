@@ -13,7 +13,44 @@ import (
 	"github.com/moehandi/go-webapp-base/helper/view"
 	"github.com/julienschmidt/httprouter"
 	"github.com/gorilla/mux"
+	"encoding/json"
 )
+
+// API GET Note
+func ApiGetNote(w http.ResponseWriter, r *http.Request) {
+	sess := session.Instance(r)
+
+	userID := fmt.Sprintf("%s", sess.Values["id"])
+
+	notes, err := model.NotesByUserID(userID)
+	if err != nil {
+		log.Println(err)
+		notes = []model.Note{}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(notes)
+}
+
+// Api NOTE GET By ID
+func ApiNoteGetById(w http.ResponseWriter, r *http.Request) {
+	sess := session.Instance(r)
+
+	vars := mux.Vars(r)
+	noteID := vars["id"]
+
+	userID := fmt.Sprintf("%s", sess.Values["id"])
+
+	// Get the note
+	note, err := model.NoteByID(userID, noteID)
+	if err != nil {
+		log.Println(err)
+		note = model.Note{}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(note)
+}
 
 
 // NotepadReadGET displays the notes in the notepad
@@ -84,6 +121,7 @@ func NotepadCreatePOST(w http.ResponseWriter, r *http.Request) {
 	// Display the same page
 	NotepadCreateGET(w, r)
 }
+
 
 // NotepadUpdateGET displays the note update page
 func NotepadUpdateGET(w http.ResponseWriter, r *http.Request) {

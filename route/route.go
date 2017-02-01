@@ -67,6 +67,10 @@ func routes() *mux.Router {
 	// About
 	r.Handle("/about", alice.New().ThenFunc(controller.AboutGET)).Methods("GET")
 
+	// Notepad API
+	r.Handle("/api/notepad", alice.New(acl.DisallowAnon).ThenFunc(controller.ApiGetNote)).Methods("GET")
+	r.Handle("/api/notepad/{id}", alice.New(acl.DisallowAnon).ThenFunc(controller.ApiNoteGetById)).Methods("GET")
+
 	// Notepad
 	r.Handle("/notepad", alice.New(acl.DisallowAnon).ThenFunc(controller.NotepadReadGET)).Methods("GET")
 	r.Handle("/notepad/create", alice.New(acl.DisallowAnon).ThenFunc(controller.NotepadCreateGET)).Methods("GET")
