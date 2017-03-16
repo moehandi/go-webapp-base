@@ -1,0 +1,67 @@
+# This is a TOML Document.
+title = "go-webapp-base"
+
+[author]
+  name = "moehandi"
+  email = "moehandi@gmail.com"
+
+[Database]
+  Type = "MongoDB"
+
+  [Database.Bolt]
+    Path = "./config/gowebapp.db"
+
+  [Database.MongoDB]
+    Database = "gowebapp"
+    URL = "127.0.0.1"
+
+  [Database.MySQL]
+    Hostname = "127.0.0.1"
+    Name = "gowebapp"
+    Parameter = "?parseTime=true"
+    Password = "terminal"
+    Port = 3306
+    Username = "root"
+
+[Email]
+  From = ""
+  Hostname = ""
+  Password = ""
+  Port = 25
+  Username = "moehandi"
+
+[Recaptcha]
+  Enabled = false
+  Secret = ""
+  SiteKey = ""
+
+[Server]
+  CertFile = "tls/server.crt"
+  HTTPPort = 8080
+  HTTPSPort = 443
+  Hostname = "localhost"
+  KeyFile = "tls/server.key"
+  UseHTTP = true
+  UseHTTPS = false
+
+[Session]
+  Name = "gosess"
+  SecretKey = "@r4B?EThaSEh_drudR7P_hub=s#s2Pah"
+
+[Session.Options]
+  Domain = ""
+  HttpOnly = true
+  MaxAge = 28800
+  Path = "/"
+  Secure = false
+
+[Template]
+  Children = ["partial/menu", "partial/footer"]
+  Root = "base"
+
+[View]
+  BaseURI = "/"
+  Caching = true
+  Extension = "tmpl"
+  Folder = "template"
+  Name = "blank"
