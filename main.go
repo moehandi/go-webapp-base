@@ -5,7 +5,6 @@ import (
 	"github.com/moehandi/go-webapp-base/route"
 	"github.com/moehandi/go-webapp-base/helper/database"
 	"github.com/moehandi/go-webapp-base/helper/email"
-	"github.com/moehandi/go-webapp-base/helper/jsonconfig"
 	"github.com/moehandi/go-webapp-base/helper/recaptcha"
 	"github.com/moehandi/go-webapp-base/helper/server"
 	"github.com/moehandi/go-webapp-base/helper/session"
@@ -14,6 +13,8 @@ import (
 	"log"
 	"os"
 	"runtime"
+		"github.com/moehandi/go-webapi-base/helper/tomlconfig"
+		"github.com/BurntSushi/toml"
 )
 
 func init() {
@@ -23,9 +24,11 @@ func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 }
 
+var configPath = "config"+string(os.PathSeparator)+"config.toml"
+
 func main() {
 	// Load the configuration file
-	jsonconfig.Load("config"+string(os.PathSeparator)+"config.json", config)
+	tomlconfig.Load(configPath, config)
 
 	// Configure the session cookie store
 	session.Configure(config.Session)
@@ -54,16 +57,21 @@ var config = &configuration{}
 
 // configuration contains the application settings
 type configuration struct {
-	Database  database.Info   `json:"Database"`
-	Email     email.SMTPInfo  `json:"Email"`
-	Recaptcha recaptcha.Info  `json:"Recaptcha"`
-	Server    server.Server   `json:"Server"`
-	Session   session.Session `json:"Session"`
-	Template  view.Template   `json:"Template"`
-	View      view.View       `json:"View"`
+		Database  database.Info   `toml:"Database"`
+		Email     email.SMTPInfo  `toml:"Email"`
+		Recaptcha recaptcha.Info  `toml:"Recaptcha"`
+		Server    server.Server   `toml:"Server"`
+		Session   session.Session `toml:"Session"`
+		Template  view.Template   `toml:"Template"`
+		View      view.View       `toml:"View"`
 }
 
 // ParseJSON unmarshals bytes to structs
 func (c *configuration) ParseJSON(b []byte) error {
 	return json.Unmarshal(b, &c)
+}
+
+// ParseTOML unmarshals bytes to structs
+func (c *configuration) ParseTOML(b []byte) error {
+		return toml.Unmarshal(b, &config)
 }
